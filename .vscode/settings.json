@@ -1,0 +1,5 @@
+{
+    "python.analysis.extraPaths": [
+        "/snap/webots/current/usr/share/webots/lib/controller/python"
+    ]
+}
