@@ -21,3 +21,11 @@ def occupancy_map_generator(grid, x, y, max_dist, size):
 
     return grid
 
+def occ_state_classifier(tree, angle, cell_dist_from_bot):
+    dist = tree.query(angle, angle)
+    if dist == 0:
+        return 'UNKNOWN'
+    elif dist > cell_dist_from_bot:
+        return 'KNOWN'
+    else:
+        return 'KNOWN'
