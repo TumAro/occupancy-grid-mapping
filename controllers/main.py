@@ -41,15 +41,6 @@ while robot.step(time_step) != -1:
     depth_map = depth_map_gen(ranges, max_dist)
     seg_tree = SegTree(depth_map.tolist())
 
-    # After creating seg_tree, add these debug prints:
-    test_angle = 90  # Look straight ahead
-    lidar_dist = seg_tree.query(test_angle, test_angle)
-    cell_distance = cell_dist(10, 10, cell_size, n)  # Middle of map
-
-    # print(f"LiDAR dist at angle {test_angle}: {lidar_dist}")
-    # print(f"Cell distance for middle: {cell_distance}")
-    # print(f"Raw LiDAR ranges sample: {ranges[85:95]}")  # Show some raw data
-
     # for row in range(n):
     #     for col in range(n):
     #         angle = c2d_projection(row, col, cell_size, n)

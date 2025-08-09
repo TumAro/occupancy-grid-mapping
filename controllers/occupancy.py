@@ -21,16 +21,28 @@ def occupancy_map_generator(grid, x, y, max_dist, size):
 
     return grid
 
-def occ_state_classifier(tree, start_a, end_a, cell_min_dist, cell_max_dist):
-    min_dist, max_dist = tree.query(start_a, end_a)
-    if min_dist == 0:           # no LiDAR hits
-        return 'UNKNOWN'
-    elif max_dist < cell_min_dist:  # Object blocks view to cell
-        return 'UNKNOWN'
-    elif min_dist > cell_max_dist:  # Cell is free
-        return 'UNKNOWN'
+def occ_state_classifier(tree, start_a, end_a, cell_min_dist, cell_max_dist, threshold=0.8):
+    min_dist, max_dist, count = tree.query(start_a, end_a)
+
+    proj_pixels = max(1, (end_a - start_a +1))
+    alpha = count / proj_pixels
+
+    if count == 0:
+        return 'UNKNOWN'    # unobserved
+    
+    if alpha > threshold:
+        if max_dist < cell_min_dist:  # Object blocks view to cell
+            return 'UNKNOWN'
+        elif min_dist > cell_max_dist:  # Cell is free
+            return 'KNOWN'
+        else:
+            return 'UNDETERMINED'
+        
     else:
-        return 'UNDETERMINED'
+        if max_dist < cell_min_dist:
+            return 'UNKNOWN'
+        else:
+            return 'UNDETERMINED'
     
 from octree import Node, Octree
 from cell2depth import c2d_projection, cell_dist
@@ -49,20 +61,19 @@ def update_occtree_occ(tree: Octree, seg_tree, cell_size, n):
         start_angle = c2d_projection(min_row, min_col, cell_size, n)
         end_angle = c2d_projection(max_row, max_col, cell_size, n)
 
-        min_dist = cell_dist(min_row, min_col, cell_size, n)
-        max_dist = cell_dist(max_row, max_col, cell_size, n)
-
-        # DEBUG PRINTS
-        print(f"Node center: {node.center}, half: {node.half}")
-        print(f"Angles: {start_angle} to {end_angle}, Distances: {min_dist:.1f} to {max_dist:.1f}")
+        cell_min = cell_dist(min_row, min_col, cell_size, n)
+        cell_max = cell_dist(max_row, max_col, cell_size, n)
 
 
-
-        state = occ_state_classifier(seg_tree, min(start_angle, end_angle), max(start_angle, end_angle), min_dist, max_dist)
-        print(f"State: {state}")
+        state = occ_state_classifier(
+                seg_tree,
+                min(start_angle, end_angle),
+                max(start_angle, end_angle),
+                min(cell_min, cell_max),
+                max(cell_min, cell_max),
+            )
 
         node.state = state
-        # print(f"Root node state: {node.state}")
         if state == 'UNDETERMINED' and node.is_leaf:
             tree._subdivide(node)
             for child in node.children:
