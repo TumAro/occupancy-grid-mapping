@@ -13,26 +13,28 @@ def aabb_intersects(center1, half1, center2, half2) -> bool:
 
 from typing import List, Tuple, Any, Optional
 from dataclasses import dataclass, field
+import itertools
+import numpy as np
 
-Point = Tuple[float, float]
+Point = Tuple[float, ...]
+Payload = Any
 
 class Node:
     def __init__(self, center: Point, half: Point):
         self.center = center
         self.half = half
-        self.points = []
-        self.children = None
+        self.children: Optional[List["Node"]] = None
+        
+        self.state = 'UNDETERMINED'
 
     @property
     def is_leaf(self):
         return self.children is None
     
 
-    
-class Tree:
-    def __init__(self, center: Point, half: Point, capacity: int = 4, max_depth: int = 8):
+class Octree:
+    def __init__(self, center: Point, half: Point, max_depth: int = 8):
         self.root = Node(center, half)
-        self.capacity = capacity
         self.max_depth = max_depth
 
     def insert(self, point: Point, payload = None) -> bool:
@@ -44,12 +46,68 @@ class Tree:
         if not contains_point(node.center, node.half, point):
             return False
 
-        if (node.is_leaf and 
-            (len(node.points) < self.capacity or depth == self.max_depth)):
-            node.points.append((point, payload))
-            return True
+        if node.is_leaf:
+            if node.state == 'UNDETERMINED' and depth < self.max_depth:
+                self._subdivide(node)
+                return True
+            
+        if node.children is not None:
+            for child in node.children:
+                if contains_point(child.center, child.half, point):
+                    return self._insert(child, point, payload, depth+1)
+            
+        return True
+    
+    @property
+    def node_count(self):
+        return self._count_nodes(self.root)
+
+    def _count_nodes(self, node: Node):
+        if node.is_leaf:
+            return 1
+        return 1 + sum(self._count_nodes(child) for child in node.children)
+
+    
+    def _subdivide(self, node: Node):
+        if node.children != None:
+            return
         
-        else:
-            return True
+        D = len(node.center)
+        child_half = tuple(h / 2 for h in node.half)
+
+        children = []
+        for signs in itertools.product((-1, 1), repeat=D):
+            center = tuple(c + s*h for c, s, h in zip(node.center, signs, child_half))
+            children.append(Node(center, child_half))
+
+        node.children = children
+
+    def to_grid(self, n: int):
+        grid = np.zeros((n, n))
+
+        def fill_node(node: Node):
+            if node is None:
+                return
+            
+            # the bounds of this node
+            min_row = max(0, int(node.center[1] - node.half[1]))
+            max_row = min(n, int(node.center[1] + node.half[1]))
+            min_col = max(0, int(node.center[0] - node.half[0]))
+            max_col = min(n, int(node.center[0] + node.half[0]))
+
+            if node.state == 'KNOWN':
+                grid[min_row:max_row, min_col:max_col] = 1
+            elif node.state == 'UNKNOWN':
+                grid[min_row:max_row, min_col:max_col] = 0
+
+            if not node.is_leaf:
+                for child in node.children:
+                    fill_node(child)
+
+        fill_node(self.root)
+        return grid
+
+
+            
 
 
