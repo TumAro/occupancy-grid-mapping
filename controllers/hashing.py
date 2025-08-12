@@ -5,4 +5,4 @@ def hash_func(col, row) -> str:
     return f"{col},{row}"
 
 def unhash(hash: str):
-    return map(int, hash.split(","))
+    return tuple(map(int, hash.split(",")))

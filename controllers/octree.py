@@ -23,7 +23,7 @@ class Node:
     def __init__(self, center: Point, half: Point):
         self.center = center
         self.half = half
-        self.children: Optional[List["Node"]] = None
+        self.children: Optional[List[Node]] = None
         
         self.state = 'UNDETERMINED'
 
@@ -69,7 +69,7 @@ class Octree:
 
     
     def _subdivide(self, node: Node):
-        if node.children != None:
+        if node.children is not None:
             return
         
         D = len(node.center)
@@ -81,6 +81,31 @@ class Octree:
             children.append(Node(center, child_half))
 
         node.children = children
+
+    def update_tree(self):
+        self.root = self._remove_known(self.root)
+    
+    def _remove_known(self, node: Node):
+        if node is None:
+            return None
+        
+        #! removing all descendants
+        if node.state == 'KNOWN':
+            return None
+        
+        if node.children is not None:
+            new_children = []
+            for child in node.children:
+                result = self._remove_known(child)
+                if result is not None:          # ! keep not  known children
+                    new_children.append(result)
+
+            if len(new_children) == 0:
+                node.children = None
+            else:
+                node.children = new_children
+
+        return node
 
     def to_grid(self, n: int):
         grid = np.zeros((n, n))

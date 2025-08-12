@@ -41,6 +41,7 @@ hash_pixel = set()
 # * ---------------------------------------
 
 while robot.step(time_step) != -1:
+    
     ranges = lidar.getRangeImage() # type: ignore
     depth_map = depth_map_gen(ranges, max_dist)
     seg_tree = SegTree(depth_map.tolist())
@@ -58,10 +59,15 @@ while robot.step(time_step) != -1:
     #             occupancy_grid[row, col] = 0
 
     update_occtree_occ(octree_map, seg_tree, cell_size, n)
+    octree_map.update_tree()
+    
+
     visual_grid = octree_map.to_grid(n)         #! visual grid gets reset here
+    
 
     node_count = octree_map.node_count
     print(f"Octree nodes: {node_count}, Grid Cells: {n*n}")
+    
     
     
     for i, dist in enumerate(ranges):
@@ -72,11 +78,12 @@ while robot.step(time_step) != -1:
             hash = hash_func(col, row)
             if 0 <= col < n and 0 <= row < n:
                 if hash not in hash_pixel:
-                    hash_pixel.add(hash)
+                    visual_grid[row, col] = 2
+                    # hash_pixel.add(hash)
 
-    for hash in hash_pixel:
-        col, row = unhash(hash)
-        visual_grid[row, col] = 2
+    # for hash in hash_pixel:
+    #     col, row = unhash(hash)
+    #     visual_grid[row, col] = 2
     
     
     
