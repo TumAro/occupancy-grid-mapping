@@ -5,16 +5,21 @@ from math import pi, cos, sin, floor
 def reset_grid(size):
     return np.zeros((size, size), dtype=int)
 
-def pos_gen(angle, dist):
+def lidar2world(angle, dist):
     rad = pi * (1 - (angle / 180))
     x = dist * cos(rad)
     y = dist * sin(rad)
 
     return rad, x, y
 
-def occupancy_map_generator(grid, x, y, max_dist, size):
+def world2grid(x, y, max_dist, size):
     grid_x = floor(x / (max_dist / size)) + floor(size / 2)
     grid_y = floor(y / (max_dist / size))
+
+    return grid_x, grid_y
+
+def occupancy_map_generator(grid, x, y, max_dist, size):
+    grid_x, grid_y = world2grid(x, y, max_dist, size)
 
     if 0 <= grid_x < size and 0 <= grid_y < size:
         grid[grid_y, grid_x] = 1
@@ -76,7 +81,7 @@ def update_occtree_occ(tree: Octree, seg_tree, cell_size, n):
         node.state = state
         if state == 'UNDETERMINED' and node.is_leaf:
             tree._subdivide(node)
-            for child in node.children:
+            for child in node.children: # type: ignore
                 process_node(child, depth + 1)
     
     process_node(tree.root, 0)

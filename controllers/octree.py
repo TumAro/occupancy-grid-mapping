@@ -65,7 +65,7 @@ class Octree:
     def _count_nodes(self, node: Node):
         if node.is_leaf:
             return 1
-        return 1 + sum(self._count_nodes(child) for child in node.children)
+        return 1 + sum(self._count_nodes(child) for child in node.children) # type: ignore
 
     
     def _subdivide(self, node: Node):
@@ -101,7 +101,7 @@ class Octree:
                 grid[min_row:max_row, min_col:max_col] = 0
 
             if not node.is_leaf:
-                for child in node.children:
+                for child in node.children: # type: ignore
                     fill_node(child)
 
         fill_node(self.root)
