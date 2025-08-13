@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from controller import Robot
+from main import Robot
 
 from src.DMAP import DMap
 from src.RAYCASTING import Raycasting

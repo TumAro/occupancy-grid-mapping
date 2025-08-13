@@ -34,7 +34,7 @@ pip install -r requirements.txt
 - In the bot select the controllers as `external`
 - From repo root, start the controller:
 ```
-python controller.py --world worlds/dmap.wbt --n 256 --max_range 20
+python main.py --world worlds/dmap.wbt --n 256 --max_range 20
 ```
 
 ## Method Overview
