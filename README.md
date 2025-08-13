@@ -4,7 +4,7 @@ The original code: [github](https://github.com/hku-mars/D-Map)
 
 ---
 ## Abstract
-D-Map is an occupancy grid mapping framework for high-resolution LiDAR that bypasses per-ray traversal. Instead of classical ray-casting (≈ O(B·R) per frame), D-Map (1) infers cell states from a depth image, (2) performs an on-tree update over a tree-based map to avoid revisiting small cells, and (3) **decrementally** removes cells that are confidently KNOWN to shrink the map over time. This repo re-implements the core ideas for a 180° LiDAR in Webots, including a segment-tree RMQ accelerator for depth ranges and an octree map with KNOWN/UNKNOWN/UNDETERMINED states. We provide a ROS 2 wrapper and small benchmarks against a ray-casting baseline.
+D-Map is an occupancy grid mapping framework for high-resolution LiDAR that bypasses per-ray traversal. Instead of classical ray-casting (≈ O(B·R) per frame), D-Map (1) infers cell states from a depth image, (2) performs an on-tree update over a tree-based map to avoid revisiting small cells, and (3) **decrementally** removes cells that are confidently KNOWN to shrink the map over time. This repo re-implements the core ideas for a 180° LiDAR in Webots, including a segment-tree RMQ accelerator for depth ranges and an octree map with KNOWN/UNKNOWN/UNDETERMINED states. We provide do it in Webots using core python, writing all the algorithms from scratch and small benchmarks against a ray-casting baseline.
 
 
 ## Key Innovations
