@@ -1,22 +1,30 @@
-## D-Map: Occupancy Grid Mapping without Ray-Casting
+# D-Map: Occupancy Grid Mapping without Ray-Casting
 The paper: [arxiv](https://arxiv.org/abs/2307.08493)  
 The original code: [github](https://github.com/hku-mars/D-Map)
 
 ---
-### Abstract
+## Abstract
 D-Map is an occupancy grid mapping framework for high-resolution LiDAR that bypasses per-ray traversal. Instead of classical ray-casting (≈ O(B·R) per frame), D-Map (1) infers cell states from a depth image, (2) performs an on-tree update over a tree-based map to avoid revisiting small cells, and (3) **decrementally** removes cells that are confidently KNOWN to shrink the map over time. This repo re-implements the core ideas for a 180° LiDAR in Webots, including a segment-tree RMQ accelerator for depth ranges and an octree map with KNOWN/UNKNOWN/UNDETERMINED states. We provide a ROS 2 wrapper and small benchmarks against a ray-casting baseline.
 
 
-### Key Innovations
+## Key Innovations
 - Depth-image occupancy determination (no per-ray traversal)
 - Segment-tree RMQ over the depth image for fast min/max queries
-- Octree map + ??? on-tree update (visit only necessary nodes)
-- ??? Decremental mapping: remove KNOWN cells to reduce map size
+- Octree map + on-tree update (visit only `KNOWN` nodes)
+- Using Hash-Pixel to store already encountered objects efficiently
 
-### Performation Results
-??
+## Performance Results
+### Average Runtime comparison
+![raycasting_time](<benchmark/img/raycasting bench.png>)  
+![dmap_time](<benchmark/img/dmap bench.png>)
 
-### Quick Start
+### Memory Comparison
+![memory](benchmark/img/memory.png)
+
+### Accuracy Result
+![accuracy](benchmark/img/Accuracy.png)
+
+## Quick Start
 - Install [Webots](https://cyberbotics.com/doc/guide/installation-procedure)
 - Install dependencies
 ```
@@ -26,17 +34,12 @@ pip install -r requirements.txt
 - In the bot select the controllers as `external`
 - From repo root, start the controller:
 ```
-python controllers/main.py --world worlds/dmap.wbt --n 256 --max_range 20
+python controller.py --world worlds/dmap.wbt --n 256 --max_range 20
 ```
 
-### Method Overview
-???
+## Method Overview
 
-### Experiment & Results
-- performance scaling
-- 
-
-### Citation
+## Citation
 ```
 @article{cai2023dmap,
   title={Occupancy Grid Mapping without Ray-Casting for High-resolution LiDAR Sensors},

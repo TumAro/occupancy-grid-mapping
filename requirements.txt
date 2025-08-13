@@ -1,4 +1,4 @@
 pydantic
 matplotlib
 numpy
-keyboard
+jupyter

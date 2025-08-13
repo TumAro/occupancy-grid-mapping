@@ -16,9 +16,11 @@ def memory_comparison(octree_map, n):
     dmap_mem = measure_dmap_memory(octree_map)
     raycast_mem = measure_raycasting_memory(n)
 
-    print(f"Memory Usage (Grid {n}×{n}):")
-    print(f"  D-Map: {dmap_mem:,} bytes ({dmap_mem/1024:.1f} KB)")
-    print(f"  Raycasting: {raycast_mem:,} bytes ({raycast_mem/1024:.1f} KB)")
-    print(f"  D-Map uses {raycast_mem/dmap_mem:.1f}x less memory")
-
+    print(f"""Memory Usage (Grid {n}×{n}):
+    D-Map: {dmap_mem:,}\t| bytes ({dmap_mem/1024:.1f} KB)
+    Raycasting: {raycast_mem:,}\t| bytes ({raycast_mem/1024:.1f} KB)
+    ------------------------------------
+    D-Map uses {raycast_mem/dmap_mem:.1f}x less memory
+""")
+    
     return dmap_mem, raycast_mem
