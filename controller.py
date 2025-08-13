@@ -1,12 +1,12 @@
 import matplotlib.pyplot as plt
 from controller import Robot
 
-from controllers.DMAP import DMap
-from controllers.RAYCASTING import Raycasting
-from controllers.octree import Octree
+from src.DMAP import DMap
+from src.RAYCASTING import Raycasting
+from src.octree import Octree
 
 # * config --------------------
-robot = Robot()
+robot = Robot() # type: ignore
 time_step = int(robot.getBasicTimeStep())
 lidar = robot.getDevice('lidar')
 lidar.enable(time_step) # type: ignore
