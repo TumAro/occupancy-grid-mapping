@@ -33,7 +33,7 @@ debug_count = {
     'UNDETERMINED': 0
 }
 
-def occ_state_classifier(tree, start_a, end_a, cell_min_dist, cell_max_dist, threshold=0.8):
+def occ_state_classifier(tree, start_a, end_a, cell_min_dist, cell_max_dist, threshold=0.3):
     min_dist, max_dist, count = tree.query(start_a, end_a)
 
     if count == 0:
@@ -59,16 +59,13 @@ def occ_state_classifier(tree, start_a, end_a, cell_min_dist, cell_max_dist, thr
         else:
             return 'UNDETERMINED'
     
-from octree import Node, Octree
-from cell2depth import c2d_projection, cell_dist
-
-
+from .octree import Node, Octree
+from .cell2depth import c2d_projection, cell_dist
 
 def update_occtree_occ(tree: Octree, seg_tree, cell_size, n):
-
     def process_node(node: Node, depth):
         if depth >= tree.max_depth:
-            return
+            return node.state
         
         min_row = max(0, int(node.center[1] - node.half[1]))
         max_row = min(n-1, int(node.center[1] + node.half[1]))
@@ -92,13 +89,24 @@ def update_occtree_occ(tree: Octree, seg_tree, cell_size, n):
         
         debug_count[state] += 1
         node.state = state
-        # print(f"*** MARKING NODE AS KNOWN at depth {depth} ***")
+
+        # if undetermined, subdivde and process children
         if state == 'UNDETERMINED' and node.is_leaf:
             tree._subdivide(node)
+            child_states = []
             for child in node.children: # type: ignore
-                process_node(child, depth + 1)
+                child_state = process_node(child, depth + 1)
+                child_states.append(child_state)
+
+            if all(s == 'KNOWN' for s in child_states):
+                node.state = 'KNOWN'
+            elif all(s == 'UNKNOWN' for s in child_states):
+                node.state = 'UNKNOWN'
+            # else keep as 'UNDETERMINED'
+        
+        return node.state
 
     process_node(tree.root, 0)
-    print(debug_count) #!
+    # print(debug_count) #!
 
     
